@@ -25,7 +25,7 @@ ls() #List objects in R's brain
 
 ```{r}
 #Load data
-DOM <-read.csv("H:/Documents/Projects/Latitude/data/dominance measures_22012020.csv", sep=";")
+DOM <-read.csv("~/data/dominance measures.csv", sep=";")
 str(DOM) #Check data is correct 
 ```
 
@@ -69,10 +69,9 @@ qqp(DOM$Mono.found.t1, "pois", fitp$estimate) #Poisson distribution
 
 Since our dependent variable (monopolization of baits found) is non-normal we use GLMM to test for an association between the two variables. 
 
-#Laplace approximation <- this is the one I used
-```{r}
-library(mlmRev)
+#Laplace approximation 
 
+```{r}
 GHQ <- glmer(Mono.found ~ First.percent + Temp.range + PIE + (1 | Locality), data = DOM,
     family = binomial(link = "logit"), nAGQ = 25)  # Set nAGQ to # of desired iterations
 
