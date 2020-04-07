@@ -1,0 +1,5 @@
+This folder contains the code for the project on Testing trade-offs and the dominance-impoverishment rule among ant communities.
+This project was based on the combined Master's study work by Jeppe Berggreen and PhD work of Julie K. Sheard in collaboration with supervisors Nathan J. Sanders and Robert R. Dunn and with Annika S. Nelson and Raphael Boulay.
+
+The folder contains five different scripts.
+Climate data.R <- for extracting climatic variables from WorldClim based on site coordinates
