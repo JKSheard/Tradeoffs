@@ -1,0 +1,72 @@
+---
+title: "t-tests"
+author: "Julie Sheard"
+date: "6/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Description
+
+This script is for the analysis of whether dominant and subordinate species have different mean values of discovery, thermal tolerance and resource generalism. 
+
+# Setting up
+
+## Clear R's brain
+```{r}
+rm(list=ls()) #Clear R's brain
+ls() #List objects in R's brain
+```
+
+#Load data
+```{r}
+#Load data
+DOM <-read.csv("H:/Documents/Projects/Latitude/data/dominance measures_22012020.csv", sep=";")
+str(DOM) #Check data is correct 
+```
+
+#Conduct t-test
+```{r}
+t.test(Temp.range~Type, data = DOM) #thermal tolerance
+t.test(PIE~Type, data = DOM) #resource generalism
+
+```
+
+#Boxplot for temperature tolerance
+
+```{r}
+(p <- ggplot(aes(x=Type, y=Temp.range), data=DOM) + 
+  geom_boxplot(width=0.4) +
+  theme_classic()+ 
+  ylab(expression("Temperature range " ( degree*C))) +
+  xlab("Dominance category") +
+  scale_y_continuous(breaks = seq(0, 30, by = 5)) +
+  stat_compare_means(method = "t.test", label.x=0.6) +
+  stat_summary(fun.y=mean, geom="point", shape=23, size=2, fill="black")+
+  theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
+        axis.text    = element_text(face = "bold", size=18),
+        axis.title = element_text(size=20),
+        legend.title = element_blank()))
+
+p + 
+```
+
+
+
+#Boxplot for resource generalism 
+```{r}
+(p <- ggplot(aes(x=Type, y=PIE), data=DOM) + 
+  geom_boxplot(width=0.4) +
+  theme_classic()+ 
+  ylab("Resource generalism (PIE)") +
+  xlab("Dominance category") +
+  stat_compare_means(method = "t.test", label.x=0.6) +
+  stat_summary(fun.y=mean, geom="point", shape=23, size=4, fill="black")+
+  theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
+        axis.text    = element_text(face = "bold", size=12),
+        axis.title = element_text(size=16),
+        legend.title = element_blank()))
+```

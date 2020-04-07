@@ -1,0 +1,134 @@
+---
+title: "Dominance-diversity trade-off"
+author: "Julie Sheard"
+date: "28/1/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Description
+
+This script is for the analysis of the dominance-diversity trade-off/the Impoverishment rule for ants across a latitudinal gradient. Expected trade-off is that diversity decreases as dominance increases or that diversity intially increases and then decreases as dominance increases.
+
+# Setting up
+
+## Clear R's brain
+```{r}
+rm(list=ls()) #Clear R's brain
+ls() #List objects in R's brain
+```
+
+## Load packages
+```{r warning=FALSE, message=FALSE}
+library(ggplot2)
+library(jtools)
+library(lme4)
+library(cowplot)
+library(car)
+```
+
+## Load and check data
+```{r}
+SITES<-read.csv("H:/Documents/Projects/Latitude/data/site measures_03042020.csv", sep=";") #Load site-level data. 38 sites
+
+str(SITES) #Check data is correct
+```
+
+# Check for random effects
+
+## Test whether a random effect (geographic or environmental variables) should be included
+
+```{r}
+mod1 <- lm(Species~Dominant.species, data = SITES)
+mod2 <- lmer(Species~Dominant.species + (1|Locality), data = SITES, REML=FALSE)
+mod3 <- lmer(Species~Dominant.species + (1|NDVI), data = SITES, REML=FALSE)
+mod4 <- lmer(Species~Dominant.species + (1|bio1), data = SITES, REML=FALSE)
+mod5 <- lmer(Species~Dominant.species + (1|bio12), data = SITES, REML=FALSE)
+mod6 <- lmer(Species~Dominant.species + (1|AET), data = SITES, REML=FALSE)
+
+anova(mod2, mod1) # p = 0.02 *
+anova(mod3, mod1) # p = 0.54
+anova(mod4, mod1) # p = 0.133
+anova(mod5, mod1) # p = 0.14
+anova(mod6, mod1) # p = 0.14
+```
+
+There is a significant effect of including the random factor 'Locality', which is in line with our expectation that there will be spatial autocorrelation in the data. 
+
+# Test the dominance-diversity trade-off
+
+## Does the number of dominant species affect overall species richness? 
+
+Fit linear mixed effects model
+Test whether the number of dominant species affects the overall number of species at a site. The assumption is that as the richness of dominant species increases, the overal number of species decreases.  
+
+```{r}
+#Linear model for the effect of dominant species number
+sites_linear<-lmer(Species~Dominant.species + (1|Locality), data = SITES, REML=FALSE)
+summary(sites_linear)
+summ(sites_linear)
+#Polynomial model for the effect of dominant species number
+sites_non<-lmer(Species~poly(Dominant.species,2)+(1|Locality), data=SITES, REML=FALSE)
+summary(sites_non)
+summ(sites_non)
+
+anova(sites_linear, sites_non)
+```
+
+There is a significant linear relationship between species richness and the number of dominant species. 
+
+```{r}
+#Linear model for the effect of relative worker numbers of dominants on species diversity
+
+wn_lin <-lmer(Species~Dominant.abundance.prop + (1|Locality), data = SITES, REML=FALSE)
+summary(wn_lin)
+summ(wn_lin)
+#Polynomial model for the effect of relative worker number of dominants
+wn_poly<-lmer(Species~poly(Dominant.abundance.prop,2)+(1|Locality), data=SITES, REML=FALSE)
+summary(wn_poly)
+summ(wn_poly)
+
+#Model comparison
+anova(sites_linear, sites_non)
+```
+
+### Plot the relationships
+```{r}
+#Effect of dominant species number
+(Site_sp<- ggplot(aes(y=Species, x=Dominant.species), data = SITES)+
+    geom_point(size=3, shape=16) + 
+    geom_smooth(method = "lm", se=F, colour="black", size = 1) +
+    theme_classic() + 
+    xlab("Number of dominant ant species at sites") +
+    ylab("Species richness at site") +
+    scale_y_continuous(breaks = seq(0, 14, by = 2))+
+    theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
+         axis.text    = element_text(face = "bold", size=12),
+         axis.title = element_text(size=12),
+         legend.title = element_blank()))
+
+#Effect of dominant species worker proportion
+(Site_abs<- ggplot(aes(y=Species, x=Dominant.abundance.prop), data = SITES)+ 
+    geom_point(size=3, shape=16) + 
+    geom_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, se=F, colour="black") +
+    theme_classic() + 
+    xlab("Relative worker number of dominants") +
+    ylab("") +
+    scale_y_continuous(breaks = seq(0, 14, by = 2))+
+    scale_x_continuous(breaks = seq(0, 1, by = 0.2))+
+    theme(panel.grid.major = element_blank(),  panel.grid.minor = element_blank(),
+         axis.text    = element_text(face = "bold", size=12),
+         plot.margin = margin(10, 20, 10, 10),
+         axis.title = element_text(size=12),
+         legend.title = element_blank()))
+```
+
+### Create figure with both plots
+```{r}
+plot_grid(Site_sp, Site_abs, ncol=2, align="hv", labels = c("a)", "b)"), hjust=0.1, vjust=1)
+```

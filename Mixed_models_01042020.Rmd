@@ -1,0 +1,213 @@
+---
+title: "Mixed models"
+author: "Julie Sheard"
+date: "1/4/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Description
+
+This script is for the analysis of the dominance-discovery trade-off, the dominance-temperature range trade-off and the dominance-resource generalism trade-off for ants across a latitudinal gradient. Expected trade-off is that dominance decreases with increasing discovery ability, decreases with increasing temperature tolerance and decreases with increasing resource generalism.
+
+# Setting up
+
+## Clear R's brain
+```{r}
+rm(list=ls()) #Clear R's brain
+ls() #List objects in R's brain
+```
+
+##Trade-offs with dominance
+
+```{r}
+#Load data
+DOM <-read.csv("H:/Documents/Projects/Latitude/data/dominance measures_22012020.csv", sep=";")
+str(DOM) #Check data is correct 
+```
+
+Dominance is measured as the monopolization percentage
+Discovery is measured as the percentage of baits discovered where the species was first to arrive
+
+### Find best probability distribution
+
+```{r}
+library(car)
+library(MASS)
+library(lme4)
+library(ggplot2)
+
+DOM$Mono.found.t <- DOM$Mono.found*100
+DOM$Mono.found.t1 <- round(DOM$Mono.found.t) +1
+
+#Test for normality
+shapiro.test(DOM$Mono.found)
+```
+
+Data is not normal, p < 0.05
+
+
+#Find best model fit
+
+```{r}
+qqp(DOM$Mono.found.t, "norm") #Normal distribution
+qqp(DOM$Mono.found.t, "lnorm") #log-normal distribution
+
+nbinom <- fitdistr(DOM$Mono.found.t1, "Negative Binomial")
+qqp(DOM$Mono.found.t1, "nbinom", size = nbinom$estimate[[1]], mu = nbinom$estimate[[2]]) #Negative binomial
+
+gamma <- fitdistr(DOM$Mono.found.t1, "gamma")
+qqp(DOM$Mono.found.t1, "gamma", shape = gamma$estimate[[1]], rate = gamma$estimate[[2]]) #Gamma distribution
+
+fitp<-fitdistr(DOM$Mono.found.t1, "Poisson")
+qqp(DOM$Mono.found.t1, "pois", fitp$estimate) #Poisson distribution
+
+```
+
+Since our dependent variable (monopolization of baits found) is non-normal we use GLMM to test for an association between the two variables. 
+
+#Laplace approximation <- this is the one I used
+```{r}
+library(mlmRev)
+
+GHQ <- glmer(Mono.found ~ First.percent + Temp.range + PIE + (1 | Locality), data = DOM,
+    family = binomial(link = "logit"), nAGQ = 25)  # Set nAGQ to # of desired iterations
+
+summary(GHQ)
+
+car::vif(GHQ)
+```
+
+#Diffference between dominant and subordinate species in means
+```{r}
+t.test(First.percent~Type, data = DOM)
+t.test(Temp.range~Type, data = DOM)
+t.test(PIE~Type, data = DOM)
+
+```
+
+#Trade-off drivers
+```{r}
+#Load r values calculated above
+relation <-read.csv("H:/Documents/Projects/Latitude/data/MANOVA_02042020.csv", sep=";")
+```
+
+#Test for normality
+```{r}
+#Test for normality
+shapiro.test(relation$rho..MonoFirst.)
+shapiro.test(relation$rho..MonoTRange.)
+shapiro.test(relation$rho..MonoPIE.)
+```
+#Find best model fit
+
+```{r}
+qqp(relation$rho..MonoFirst.t, "norm") #Normal distribution
+qqp(relation$rho..MonoTRange.) #Normal distribution
+qqp(relation$rho..MonoPIE.t, "norm") #Normal distribution
+
+```
+
+Data is normally distributed
+
+#Model effect of climate on Dominance-Discovery trade-off
+```{r}
+lmm <- lmer(rho..MonoFirst. ~ bio1+bio12+AET+I(NDVI_1km_monthly*100) + (1 | Locality), data = relation,
+    REML = FALSE)
+summary(lmm)
+
+#NDVI was rescaled for modelling purposes 
+
+Anova(lmm)
+
+car::vif(lmm)
+
+#Remove AET
+lmm2 <- lmer(rho..MonoFirst. ~ bio1+bio12+I(NDVI_1km_monthly*100) + (1 | Locality), data = relation,
+    REML = FALSE)
+summary(lmm2)
+
+car::vif(lmm2)
+
+p.adjust(0.12, method="bonferroni", n=4)
+
+```
+
+
+#Model effect of climate on Dominance-thermal tolerance trade-off
+```{r}
+lmm <- lmer(rho..MonoTRange. ~ bio1+bio12+AET+I(NDVI_1km_monthly*100) + (1 | Locality), data = relation,
+    REML = FALSE)
+summary(lmm)
+
+#NDVI was rescaled for modelling purposes 
+Anova(lmm)
+
+car::vif(lmm)
+
+#Remove AET
+lmm2 <- lmer(rho..MonoTRange. ~ bio1+bio12+I(NDVI_1km_monthly*100) + (1 | Locality), data = relation,
+    REML = FALSE)
+summary(lmm2)
+Anova(lmm2)
+
+car::vif(lmm2)
+
+p.adjust(0.24, method="bonferroni", n=4)
+
+```
+
+
+#Model effect of climate on Dominance-resource generalism tolerance trade-off
+```{r}
+lmm <- lmer(rho..MonoPIE. ~ bio1+bio12+AET+I(NDVI_1km_monthly*100) + (1 | Locality), data = relation,
+    REML = FALSE)
+summary(lmm)
+
+#NDVI was rescaled for modelling purposes 
+Anova(lmm)
+
+car::vif(lmm)
+
+#Remove AET
+lmm2 <- lmer(rho..MonoPIE. ~ bio1+bio12+I(NDVI_1km_monthly*100) + (1 | Locality), data = relation,
+    REML = FALSE)
+summary(lmm2)
+Anova(lmm2)
+
+car::vif(lmm2)
+
+p.adjust(0.02, method="bonferroni", n=3)
+
+```
+
+#Plot effect of Annual precipitation (bio12) on the dominance-resource generalism trade-off
+
+```{r}
+(g<- ggplot(aes(y=rho..MonoPIE., x=bio12), data = relation)+ 
+   geom_point() +
+   theme_bw() + 
+   ylab("Dominance-resouce generalism trade-off") +
+   xlab("Annual precipitation") +
+   theme(axis.text    = element_text(face = "bold"),
+         legend.title = element_blank())  )
+```
+
+#Redo analysis with outlier removed
+```{r}
+sub_rel <- relation[-c(7),] 
+
+lmm <- lmer(rho..MonoPIE. ~ bio1+bio12+AET+I(NDVI_1km_monthly*100) + (1 | Locality), data = sub_rel,
+    REML = FALSE)
+summary(lmm)
+
+Anova(lmm)
+
+p.adjust(0.052, method="bonferroni", n=3)
+
+```
+
+

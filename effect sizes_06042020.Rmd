@@ -1,0 +1,178 @@
+---
+title: "Trade-off drivers"
+author: "Julie K. Sheard"
+date: "2 maj 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Introduction
+This is the script to test different potential drivers of trade-offs in ants. We test the effect of community variables (number of workers, number of species, number of workers per species), environmental variables (actual evapotranspiration) and NDVI as a measure of overall resource availability at the site during sampling. 
+
+
+```{r}
+#Load data
+DOM <-read.csv("H:/Documents/Projects/Latitude/data/dominance measures_22012020.csv", sep=";")
+str(DOM) #Check data is correct 
+```
+
+#Get r values
+
+##Subset datasets
+First we want to find the correlation between the different trade-offs at each individual site. To do this we subset the full dataset into individual site data. We exclude sites which only have 1 or 2 observations. These are marked with #
+
+```{r}
+# Amager <- DOM[which(DOM$Site=='Amagerfaelled'),] #Only 2 obs
+Bl_A <- DOM[which(DOM$Site=='BlZrZ A'),]
+Bl_B <- DOM[which(DOM$Site=='BlZrZ B'),]
+#UC_Irvine <- DOM[which(DOM$Site=='California UC Irvine Ecological Preserve'),] #Only 1 obs
+Col <- DOM[which(DOM$Site=='Colorado Sparse Aspen Meadow '),]
+Cui_A <- DOM[which(DOM$Site=='Cuillera A'),]
+# Don_G <- DOM[which(DOM$Site=='Donana Grassland'),] #Only 2 obs
+Don_P <- DOM[which(DOM$Site=='Donana Pine '),]
+Don_S <- DOM[which(DOM$Site=='Donana Shrub '),]
+Dyrehaven <- DOM[which(DOM$Site=='Dyrehaven '),]
+FG <- DOM[which(DOM$Site=='French Guiana'),]
+Gir_F <- DOM[which(DOM$Site=='Girona forest '),]
+Gir_P <- DOM[which(DOM$Site=='Girona park '),]
+Gir_U <- DOM[which(DOM$Site=='Girona Universidad '),]
+Jouz <- DOM[which(DOM$Site=='JouZ-les-Tours'),]
+La_Bern <- DOM[which(DOM$Site=='La Bernardilla H'),]
+La_Tur <- DOM[which(DOM$Site=='La Turleda (Girona) '),]
+Lan_C <- DOM[which(DOM$Site=='Lanjaron (2) C'),]
+Lan_D <- DOM[which(DOM$Site=='Lanjaron (3) D'),]
+Lan_E <- DOM[which(DOM$Site=='Lanjaron (4) E'),]
+Lan_F <- DOM[which(DOM$Site=='Lanjaron (5) F'),]
+Lan_B <- DOM[which(DOM$Site=='Lanjaron B'),]
+# Le_Re <- DOM[which(DOM$Site=='Le Revard'),] #Only 1 obs
+Lob_A <- DOM[which(DOM$Site=='Lobres A'),]
+Blue_Jay <- DOM[which(DOM$Site=='Lower Blue Jay Campground, Cleveland National Forest'),]
+Madrid_G <- DOM[which(DOM$Site=='Madrid Grassland '),]
+# Madrid_S <- DOM[which(DOM$Site=='Madrid shrub-grass'),] #Only 1 obs
+Madrid_U <- DOM[which(DOM$Site=='Madrid Universidad '),]
+# Mog_M <- DOM[which(DOM$Site=='Moggingen open meadow '),] #Only 1 obs
+Mog_D <- DOM[which(DOM$Site=='Moggingen wet dirt '),]
+Pinares <- DOM[which(DOM$Site=='Pinares '),]
+Reg_1 <- DOM[which(DOM$Site=='Regensburg universitat (1)'),]
+#Reg_2 <- DOM[which(DOM$Site=='Regensburg universitat (2)'),] #Only 1 obs
+StB_B <- DOM[which(DOM$Site=='St Brevin (2) B'),]
+StB_3 <- DOM[which(DOM$Site=='St Brevin (3)'),]
+StB_A <- DOM[which(DOM$Site=='St Brevin A'),]
+UCJ <- DOM[which(DOM$Site=='UC James San Jacinto Mountains Reserve'),]
+Velez <- DOM[which(DOM$Site=='Velez G'),]
+```
+
+##Dominance-discovery trade-off
+
+We use Spearman rank correlation to test the dominance-discovery trade-off at each individual site and save the r values in a spreadsheet. 
+
+```{r}
+cor.test(Bl_A$Mono.found, Bl_A$First.percent, method=c("spearman"))
+cor.test(Bl_B$Mono.found, Bl_B$First.percent, method=c("spearman"))
+cor.test(Blue_Jay$Mono.found, Blue_Jay$First.percent, method=c("spearman"))
+cor.test(Col$Mono.found, Col$First.percent, method=c("spearman"))
+cor.test(Cui_A$Mono.found, Cui_A$First.percent, method=c("spearman"))
+cor.test(Don_P$Mono.found, Don_P$First.percent, method=c("spearman"))
+cor.test(Don_S$Mono.found, Don_S$First.percent, method=c("spearman"))
+cor.test(Dyrehaven$Mono.found, Dyrehaven$First.percent, method=c("spearman"))
+cor.test(FG$Mono.found, FG$First.percent, method=c("spearman"))
+cor.test(Gir_F$Mono.found, Gir_F$First.percent, method=c("spearman"))
+cor.test(Gir_P$Mono.found, Gir_P$First.percent, method=c("spearman"))
+cor.test(Gir_U$Mono.found, Gir_U$First.percent, method=c("spearman"))
+cor.test(Jouz$Mono.found, Jouz$First.percent, method=c("spearman"))
+cor.test(La_Bern$Mono.found, La_Bern$First.percent, method=c("spearman"))
+cor.test(La_Tur$Mono.found, La_Tur$First.percent, method=c("spearman"))
+cor.test(Lan_B$Mono.found, Lan_B$First.percent, method=c("spearman"))
+cor.test(Lan_C$Mono.found, Lan_C$First.percent, method=c("spearman"))
+cor.test(Lan_D$Mono.found, Lan_D$First.percent, method=c("spearman"))
+cor.test(Lan_E$Mono.found, Lan_E$First.percent, method=c("spearman"))
+cor.test(Lan_F$Mono.found, Lan_F$First.percent, method=c("spearman"))
+cor.test(Lob_A$Mono.found, Lob_A$First.percent, method=c("spearman"))
+cor.test(Madrid_G$Mono.found, Madrid_G$First.percent, method=c("spearman"))
+cor.test(Madrid_U$Mono.found, Madrid_U$First.percent, method=c("spearman"))
+cor.test(Mog_D$Mono.found, Mog_D$First.percent, method=c("spearman"))
+cor.test(Pinares$Mono.found, Pinares$First.percent, method=c("spearman"))
+cor.test(Reg_1$Mono.found, Reg_1$First.percent, method=c("spearman"))
+cor.test(StB_3$Mono.found, StB_3$First.percent, method=c("spearman"))
+cor.test(StB_A$Mono.found, StB_A$First.percent, method=c("spearman"))
+cor.test(StB_B$Mono.found, StB_B$First.percent, method=c("spearman"))
+cor.test(UCJ$Mono.found, UCJ$First.percent, method=c("spearman"))
+cor.test(Velez$Mono.found, Velez$First.percent, method=c("spearman"))
+```
+
+## Dominance-temperature trade-off
+
+```{r}
+cor.test(Bl_A$Mono.found, Bl_A$Temp.range, method=c("spearman"))
+cor.test(Bl_B$Mono.found, Bl_B$Temp.range, method=c("spearman"))
+cor.test(Blue_Jay$Mono.found, Blue_Jay$Temp.range, method=c("spearman"))
+cor.test(Col$Mono.found, Col$Temp.range, method=c("spearman"))
+cor.test(Cui_A$Mono.found, Cui_A$Temp.range, method=c("spearman"))
+cor.test(Don_P$Mono.found, Don_P$Temp.range, method=c("spearman"))
+cor.test(Don_S$Mono.found, Don_S$Temp.range, method=c("spearman"))
+cor.test(Dyrehaven$Mono.found, Dyrehaven$Temp.range, method=c("spearman"))
+cor.test(FG$Mono.found, FG$Temp.range, method=c("spearman"))
+cor.test(Gir_F$Mono.found, Gir_F$Temp.range, method=c("spearman"))
+cor.test(Gir_P$Mono.found, Gir_P$Temp.range, method=c("spearman"))
+cor.test(Gir_U$Mono.found, Gir_U$Temp.range, method=c("spearman"))
+cor.test(Jouz$Mono.found, Jouz$Temp.range, method=c("spearman"))
+cor.test(La_Bern$Mono.found, La_Bern$Temp.range, method=c("spearman"))
+cor.test(La_Tur$Mono.found, La_Tur$Temp.range, method=c("spearman"))
+cor.test(Lan_B$Mono.found, Lan_B$Temp.range, method=c("spearman"))
+cor.test(Lan_C$Mono.found, Lan_C$Temp.range, method=c("spearman"))
+cor.test(Lan_D$Mono.found, Lan_D$Temp.range, method=c("spearman"))
+cor.test(Lan_E$Mono.found, Lan_E$Temp.range, method=c("spearman"))
+cor.test(Lan_F$Mono.found, Lan_F$Temp.range, method=c("spearman"))
+cor.test(Lob_A$Mono.found, Lob_A$Temp.range, method=c("spearman"))
+cor.test(Madrid_G$Mono.found, Madrid_G$Temp.range, method=c("spearman"))
+cor.test(Madrid_U$Mono.found, Madrid_U$Temp.range, method=c("spearman"))
+cor.test(Mog_D$Mono.found, Mog_D$Temp.range, method=c("spearman"))
+cor.test(Pinares$Mono.found, Pinares$Temp.range, method=c("spearman"))
+cor.test(Reg_1$Mono.found, Reg_1$Temp.range, method=c("spearman"))
+cor.test(StB_3$Mono.found, StB_3$Temp.range, method=c("spearman"))
+cor.test(StB_A$Mono.found, StB_A$Temp.range, method=c("spearman"))
+cor.test(StB_B$Mono.found, StB_B$Temp.range, method=c("spearman"))
+cor.test(UCJ$Mono.found, UCJ$Temp.range, method=c("spearman"))
+cor.test(Velez$Mono.found, Velez$Temp.range, method=c("spearman"))
+```
+
+##Dominance-specialisation trade-off
+
+```{r}
+cor.test(Bl_A$Mono.found, Bl_A$PIE, method=c("spearman"))
+cor.test(Bl_B$Mono.found, Bl_B$PIE, method=c("spearman"))
+cor.test(Blue_Jay$Mono.found, Blue_Jay$PIE, method=c("spearman"))
+cor.test(Col$Mono.found, Col$PIE, method=c("spearman"))
+cor.test(Cui_A$Mono.found, Cui_A$PIE, method=c("spearman"))
+cor.test(Don_P$Mono.found, Don_P$PIE, method=c("spearman"))
+cor.test(Don_S$Mono.found, Don_S$PIE, method=c("spearman"))
+cor.test(Dyrehaven$Mono.found, Dyrehaven$PIE, method=c("spearman"))
+cor.test(FG$Mono.found, FG$PIE, method=c("spearman"))
+cor.test(Gir_F$Mono.found, Gir_F$PIE, method=c("spearman"))
+cor.test(Gir_P$Mono.found, Gir_P$PIE, method=c("spearman"))
+cor.test(Gir_U$Mono.found, Gir_U$PIE, method=c("spearman"))
+cor.test(Jouz$Mono.found, Jouz$PIE, method=c("spearman"))
+cor.test(La_Bern$Mono.found, La_Bern$PIE, method=c("spearman"))
+cor.test(La_Tur$Mono.found, La_Tur$PIE, method=c("spearman"))
+cor.test(Lan_B$Mono.found, Lan_B$PIE, method=c("spearman"))
+cor.test(Lan_C$Mono.found, Lan_C$PIE, method=c("spearman"))
+cor.test(Lan_D$Mono.found, Lan_D$PIE, method=c("spearman"))
+cor.test(Lan_E$Mono.found, Lan_E$PIE, method=c("spearman"))
+cor.test(Lan_F$Mono.found, Lan_F$PIE, method=c("spearman"))
+cor.test(Lob_A$Mono.found, Lob_A$PIE, method=c("spearman"))
+cor.test(Madrid_G$Mono.found, Madrid_G$PIE, method=c("spearman"))
+cor.test(Madrid_U$Mono.found, Madrid_U$PIE, method=c("spearman"))
+cor.test(Mog_D$Mono.found, Mog_D$PIE, method=c("spearman"))
+cor.test(Pinares$Mono.found, Pinares$PIE, method=c("spearman"))
+cor.test(Reg_1$Mono.found, Reg_1$PIE, method=c("spearman"))
+cor.test(StB_3$Mono.found, StB_3$PIE, method=c("spearman"))
+cor.test(StB_A$Mono.found, StB_A$PIE, method=c("spearman"))
+cor.test(StB_B$Mono.found, StB_B$PIE, method=c("spearman"))
+cor.test(UCJ$Mono.found, UCJ$PIE, method=c("spearman"))
+cor.test(Velez$Mono.found, Velez$PIE, method=c("spearman"))
+```
+
+#Save all values in a new spreadsheet.
