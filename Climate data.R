@@ -1,7 +1,3 @@
-setwd("H:/Documents/Projects/Latitude/data")
-
-
-
 library(dplyr)
 library(data.table)
 library(ggplot2)
@@ -17,7 +13,7 @@ library(raster)
 library(sp)
 
 climate <- getData("worldclim",var="bio",res=2.5)
-point=read.csv("extractclimate.csv", sep=";")
+point=read.csv("~/data/extractclimate.csv", sep=";")
 
 values <- extract(climate,SpatialPoints(point[,2:1]))
 
