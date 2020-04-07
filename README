@@ -3,3 +3,7 @@ This project was based on the combined Master's study work by Jeppe Berggreen an
 
 The folder contains five different scripts.
 Climate data.R <- for extracting climatic variables from WorldClim based on site coordinates
+effect_sizes.Rmd <- For extracting correlation values for the trade-offs at each site to be used in the study of whether environmental variables affect the strength of trade-offs. 
+Impoverishment_rule.Rmd <- for testing the Impoverishment rule (The dominance-diversity trade-off)
+Mixed_models.Rmd <- For testing whether there is a trade-off in ants between dominance and discovery, dominance and thermal tolerance and dominance and resource generalism and for testing whether environmental variables explain the strength of trade-offs across multiple sites.
+t-tests.Rmd <- For testing whether dominant and subordinate species differ in their mean discovery ability, temperature tolerance and resource generalism. 
