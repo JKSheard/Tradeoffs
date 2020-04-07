@@ -24,7 +24,7 @@ ls() #List objects in R's brain
 #Load data
 ```{r}
 #Load data
-DOM <-read.csv("H:/Documents/Projects/Latitude/data/dominance measures_22012020.csv", sep=";")
+DOM <-read.csv("~/data/dominance measures_22012020.csv", sep=";")
 str(DOM) #Check data is correct 
 ```
 
