@@ -34,7 +34,7 @@ library(car)
 
 ## Load and check data
 ```{r}
-SITES<-read.csv("H:/Documents/Projects/Latitude/data/site measures_03042020.csv", sep=";") #Load site-level data. 38 sites
+SITES<-read.csv("~/data/site measures.csv", sep=";") #Load site-level data. 38 sites
 
 str(SITES) #Check data is correct
 ```
