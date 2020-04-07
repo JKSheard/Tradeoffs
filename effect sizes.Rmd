@@ -15,7 +15,7 @@ This is the script to test different potential drivers of trade-offs in ants. We
 
 ```{r}
 #Load data
-DOM <-read.csv("H:/Documents/Projects/Latitude/data/dominance measures_22012020.csv", sep=";")
+DOM <-read.csv("~/data/dominance measures.csv", sep=";")
 str(DOM) #Check data is correct 
 ```
 
